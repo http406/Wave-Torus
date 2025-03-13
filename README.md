@@ -28,7 +28,7 @@ In the provided code, the parameters are set as follows:
 
 2. **Minor Radius (\(r\))**: This is the radius of the tube itself. It defines the thickness of the torus.
 
-3. **Wave Modulation (\(a \sin(n u)\))**: This term introduces the wave-like modulation to the torus. The amplitude \(a\) controls the height of the waves, and the frequency \(n\) controls how many waves are present around the torus.
+3. **Wave Modulation (\(a sin(n u)\))**: This term introduces the wave-like modulation to the torus. The amplitude \(a\) controls the height of the waves, and the frequency \(n\) controls how many waves are present around the torus.
 
 4. **Parametric Angles (\(u\) and \(v\))**: These angles parameterize the surface of the torus. The angle \(u\) varies around the major radius, and the angle \(v\) varies around the minor radius.
 
