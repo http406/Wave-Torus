@@ -8,20 +8,11 @@ A **Wave Torus** is a variation of a standard torus (a doughnut-shaped surface) 
 
 The equation used to define the Wave Torus in the code is a parametric equation that describes the coordinates \((x, y, z)\) of points on the surface of the torus. Here's the equation broken down:
 
-\[
-\begin{cases}
-x = \left(R + (r + a \sin(n u)) \cos(v)\right) \cos(u) \\
-y = \left(R + (r + a \sin(n u)) \cos(v)\right) \sin(u) \\
-z = (r + a \sin(n u)) \sin(v)
-\end{cases}
-\]
+![Image](https://github.com/user-attachments/assets/546bae73-96a0-4241-9c34-be8b14d310fc)
 
 Where:
-- \(R\) is the major radius of the torus (the distance from the center of the torus to the center of the tube).
-- \(r\) is the minor radius of the torus (the radius of the tube).
-- \(a\) is the amplitude of the wave modulation.
-- \(n\) is the frequency of the wave modulation.
-- \(u\) and \(v\) are the parametric angles that range from \(0\) to \(2\pi\).
+
+![Image](https://github.com/user-attachments/assets/4a6cd565-e9a5-4022-aeba-0ac067eb061b)
 
 ### Parameters in the Code
 
