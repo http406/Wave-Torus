@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Torus</title>
+    <style>
+         body { margin: 0; 
+        background-color: black; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        height: 100vh;
+        margin: 0; 
+        outline: none;
+        background: #000;
+        -webkit-tap-highlight-color: transparent;
+        }
+        canvas { display: block; }
+        #infoButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .info-popup {
+            display: none;
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: left;
+            user-select: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <button id="infoButton">&#9432;</button>
+    <div class="info-popup" id="infoPopup">
+        <p style="text-align:center;" ><strong>Skidan Ruled Surface</strong></p>
+    <p style="color:pink; text-align: center;">A Wave Torus is a variation of a standard torus (a doughnut-shaped surface) that incorporates a wave-like modulation along its surface. This modulation creates a rippled or undulating effect, giving the torus a more complex and visually interesting shape. The Wave Torus can be used in various fields such as computer graphics, architectural design, and artistic visualization to create intricate and dynamic 3D models.</p>
+            <p style="text-align:center;">For Equations visit my Github. Enjoy!</p>
+    </div>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Parameters for the Wave Torus
+        const R = 6, r = 0.8, a = 2.2, n = 8;
+        const segments = 100;
+
+        // Create the geometry
+        const geometry = new THREE.BufferGeometry();
+        const vertices = [];
+        const indices = [];
+
+        for (let u = 0; u <= segments; u++) {
+            for (let v = 0; v <= segments; v++) {
+                const uAngle = (u / segments) * 2 * Math.PI;
+                const vAngle = (v / segments) * 2 * Math.PI;
+
+                const x = (R + (r + a * Math.sin(n * uAngle)) * Math.cos(vAngle)) * Math.cos(uAngle);
+                const y = (R + (r + a * Math.sin(n * uAngle)) * Math.cos(vAngle)) * Math.sin(uAngle);
+                const z = (r + a * Math.sin(n * uAngle)) * Math.sin(vAngle);
+
+                vertices.push(x, y, z);
+            }
+        }
+
+        for (let u = 0; u < segments; u++) {
+            for (let v = 0; v < segments; v++) {
+                const i = u * (segments + 1) + v;
+                const j = i + segments + 1;
+
+                indices.push(i, j, i + 1);
+                indices.push(j, j + 1, i + 1);
+            }
+        }
+
+        geometry.setIndex(indices);
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+        // Rainbow shader material
+        const vertexShader = `
+            varying vec3 vPosition;
+            void main() {
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            varying vec3 vPosition;
+            void main() {
+                float hue = atan(vPosition.z, vPosition.x) / (2.0 * 3.14159265359) + 0.5;
+                vec3 color = vec3(
+                    abs(hue - 0.5) * 2.0,
+                    1.0 - abs(hue - 0.5) * 2.0,
+                    hue
+                );
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        const material = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            wireframe: true
+        });
+
+        const waveTorus = new THREE.Mesh(geometry, material);
+        scene.add(waveTorus);
+
+        // Create starfield
+        const starGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+        const starColors = [];
+
+        for (let i = 0; i < 1000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+
+            starVertices.push(x, y, z);
+
+            const color = new THREE.Color();
+            color.setHSL(Math.random(), 1.0, 0.7);
+            starColors.push(color.r, color.g, color.b);
+        }
+
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        starGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starColors, 3));
+
+        const starMaterial = new THREE.PointsMaterial({ size: 0.9, vertexColors: true });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Camera position
+        camera.position.z = 25;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            waveTorus.rotation.x += 0.01;
+            waveTorus.rotation.y += 0.01;
+
+            // Animate stars
+            const positions = starGeometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] -= 0.1; // Move stars downwards
+                if (positions[i + 1] < -1000) positions[i + 1] = 1000; // Reset star position
+            }
+            starGeometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+        
+         $("#infoButton").click(function() {
+            $("#infoPopup").fadeToggle();
+        });
+    </script>
+</body>
+  </html>
